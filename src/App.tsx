@@ -26,7 +26,7 @@ import { Faq } from '@/components/sections/Faq';
  * `Methodology` are still mounted but hidden by `display:none` in globals.css —
  * same as the static page, so un-hiding stays a one-line CSS change.
  */
-export default function Page() {
+export function App() {
   return (
     <>
       <SiteChrome />

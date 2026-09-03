@@ -1,5 +1,3 @@
-'use client';
-
 /**
  * SampleComposition — ported 1:1 from competition-benchmarking-v2/index.html.
  * Mechanical HTML->JSX conversion; styling comes from the verbatim globals.css.

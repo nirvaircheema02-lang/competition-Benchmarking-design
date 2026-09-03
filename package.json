@@ -2,24 +2,23 @@
   "name": "competition-benchmarking-v2-react",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@10.33.0",
-  "engines": { "node": ">=20" },
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "tsc": "tsc --noEmit",
-    "lint": "eslint src/"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "tsc": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "16.2.4",
-    "react": "19.2.6",
-    "react-dom": "19.2.6"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^26.4.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5"
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5",
+    "vite": "^6.0.0"
   }
 }
