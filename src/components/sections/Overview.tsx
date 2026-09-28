@@ -10,8 +10,9 @@ export function Overview() {
             <h2>What This Report Helps You Solve</h2>
             <p className="sub">Six strategic decision contexts where this benchmarking study delivers direct value.</p>
           </div>
-          <div className="table-wrap">
-          <table className="solve-table">
+          <div className="report-table-wrap">
+          <div className="report-table-scroll">
+          <table className="report-table">
             <thead><tr><th>Business Use Case</th><th>What It Helps You Do</th></tr></thead>
             <tbody>
               <tr>
@@ -40,6 +41,7 @@ export function Overview() {
               </tr>
             </tbody>
           </table>
+          </div>
           </div>
         </div>
   );

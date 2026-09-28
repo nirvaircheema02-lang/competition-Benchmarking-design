@@ -150,6 +150,7 @@
   --z-sticky: 20;
   --z-header: 900;
   --z-fixed:  800;
+  --z-modal:  1000;
 }
 
 /* =========================================================
@@ -208,7 +209,7 @@ h3 {
   font-size: var(--text-sm);
   color: var(--text-muted);
   margin-top: var(--space-xs);
-  max-width: 580px;
+  /* Runs the full section container, matching the heading above it. */
 }
 
 /* =========================================================
@@ -224,7 +225,6 @@ h3 {
      desktop  96px (--space-4xl)   mobile 64px (--space-3xl)                */
 .sec  { padding: 0; }
 .sec--accent   { background: var(--section-bg-accent); }
-.sec--tint     { background: var(--tint-soft); }
 
 /* Page shell — full-bleed: TOC rail flush to the left edge, main column fills the rest.
    Horizontal gutters sit on the section blocks (not the shell) so section
@@ -267,7 +267,7 @@ h3 {
      Height comes from the measured header, not a hardcoded 100. */
   .side-toc {
     display: flex; flex-direction: column;
-    width: 336px; flex-shrink: 0;
+    width: 260px; flex-shrink: 0;
     position: sticky; top: var(--header-h); align-self: flex-start;
     height: calc(100vh - var(--header-h));
     padding-top: 32px;
@@ -288,8 +288,11 @@ h3 {
   display: flex; flex-direction: column;
   flex: 1 1 auto; min-height: 0;
   overflow-y: auto; overscroll-behavior: contain;
-  padding-bottom: 4px;
+  padding: 4px 0;
+  /* reference hides the rail scrollbar; the list still scrolls */
+  scrollbar-width: none;
 }
+.side-toc-list::-webkit-scrollbar { display: none; }
 .side-toc-link {
   display: flex; align-items: baseline; gap: 10px;
   padding: 10px 14px 10px 9px; margin-left: 10px;
@@ -297,17 +300,17 @@ h3 {
   cursor: pointer; transition: background-color .2s ease-out, border-color .2s ease-out;
 }
 .side-toc-num {
-  font-family: var(--font-sans); font-size: .7rem; font-weight: 400; color: var(--black-500);
-  flex-shrink: 0; min-width: 22px; font-variant-numeric: tabular-nums; line-height: 1;
+  font-family: var(--font-sans); font-size: .75rem; font-weight: 400; color: var(--black-500);
+  flex-shrink: 0; min-width: 26px; font-variant-numeric: tabular-nums; line-height: 1;
   transition: color .2s ease-out;
 }
 .side-toc-title {
   font-family: var(--font-sans); font-size: .8rem; font-weight: 400; color: var(--black-600);
   line-height: 1.3; transition: color .2s ease-out;
-  /* Wraps rather than truncating: TOC labels now carry each section's real
-     heading (e.g. "Key Operational Performance Metrics"), which ellipsis
-     would have cut mid-word. */
-  overflow-wrap: anywhere;
+  /* Reference truncates to a single line. `min-width:0` is what lets a flex
+     child shrink far enough for text-overflow to engage at all. */
+  flex: 1; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .side-toc-link:hover { background: rgba(0,0,0,.025); }
 .side-toc-link.active { background: rgba(176,31,36,.04); border-left-color: var(--brand-red); }
@@ -376,7 +379,6 @@ h3 {
 .btn-secondary:active { background: rgba(176,31,36,.09); }
 .btn-sm  { padding: 8px 16px; font-size: .8rem; }
 .btn-lg  { padding: 14px 28px; font-size: 1rem; }
-.btn-xs  { padding: 6px 12px; font-size: .74rem; }
 .btn-block { width: 100%; justify-content: center; }
 .btn:disabled, .btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; pointer-events: none; }
 
@@ -512,8 +514,9 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
   margin: 0 auto;
   padding: 0 28px;
   display: grid;
-  grid-template-columns: 1fr 460px;
-  gap: 56px;
+  /* right column now carries a landscape preview, so it needs real width */
+  grid-template-columns: 1.2816fr 1fr;
+  gap: 26px;
   align-items: start;
   position: relative;
   z-index: 1;
@@ -539,78 +542,115 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 .hero-title .accent { color: inherit; }
 .hero-sub { color: var(--text-muted); font-size: var(--text-sm); margin-bottom: 28px; max-width: 540px; }
 
-
 .hero-ctas { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
 .hero-note {
   font-size: .78rem; color: var(--text-subtle);
   display: flex; align-items: center; gap: 6px;
 }
 
-/* --- Hero dashboard preview card --- */
+/* --- Hero benchmarking preview -------------------------------------------
+   Matches the supplied reference: one shelled card on a soft shadow, four
+   bands (KPI tiles / two charts / two charts / KPI tiles), no top CTA.
+   Every company-wise value is a blurred mask, as in the reference. */
 .hero-dash {
+  position: relative;
+  align-self: center;
   background: var(--white);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xl);
-  overflow: hidden;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-xs);
+  /* soft and wide, like the reference — --shadow-xl is too tight and dark here */
+  box-shadow: 0 24px 56px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.05);
+  padding: 10px;
+  display: flex; flex-direction: column; gap: 7px;
 }
-.hero-dash-top {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-default);
+
+.hero-dash-head {
+  display: flex; align-items: center; gap: 9px;
+  padding: 1px 2px 7px;
+  border-bottom: 1px solid var(--border-soft);
 }
-.hero-dash-brand { display: flex; align-items: center; gap: 8px; }
-.hero-dash-brand-mark {
-  width: 24px; height: 24px; border-radius: var(--radius-2xs);
-  background: var(--black); display: flex; align-items: center; justify-content: center;
+.hero-dash-mark {
+  width: 22px; height: 22px; flex-shrink: 0;
+  border-radius: var(--radius-2xs); background: var(--black);
+  display: inline-flex; align-items: center; justify-content: center;
 }
-.hero-dash-brand-mark svg { width: 13px; height: 13px; }
-.hero-dash-title { font-family: var(--font-sans); font-weight: 700; font-size: .82rem; color: var(--text); }
-.hero-dash-link { font-size: .74rem; font-weight: 600; color: var(--brand-red); display: flex; align-items: center; gap: 4px; }
-.hero-dash-link:hover { text-decoration: underline; }
+.hero-dash-mark svg { width: 13px; height: 13px; stroke: var(--white); stroke-width: 2.4; }
+.hero-dash-title { font-family: var(--font-sans); font-weight: 700; font-size: .8rem; color: var(--text); }
 
-.hero-dash-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 16px; }
-
-.hd-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.hd-stat { background: var(--section-bg-accent); border-radius: var(--radius-xs); padding: 10px 10px 11px; }
-.hd-stat-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.hd-stat-icon { font-size: .78rem; }
-.hd-stat-lock { color: var(--black-400); font-size: .65rem; }
-.hd-stat-bar { height: 15px; border-radius: 3px; background: linear-gradient(90deg, var(--black-200), var(--black-100)); filter: blur(1.5px); margin-bottom: 6px; }
-.hd-stat-label { font-size: .64rem; font-weight: 600; color: var(--text-subtle); line-height: 1.3; }
-
-.hd-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.hd-chart { background: var(--section-bg-accent); border-radius: var(--radius-xs); padding: 12px; }
-.hd-chart-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.hd-chart-title { font-size: .68rem; font-weight: 700; color: var(--text); }
-.hd-chart-info { color: var(--black-400); font-size: .68rem; }
-.hd-chart-canvas { position: relative; height: 64px; }
-.hd-bars { display: flex; align-items: flex-end; gap: 4px; height: 100%; }
-.hd-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; }
-.hd-bar { width: 100%; border-radius: 2px 2px 0 0; background: linear-gradient(180deg, var(--accent-purple), var(--accent-purple-soft)); }
-.hd-lock { position: absolute; top: -13px; font-size: .55rem; }
-.hd-line-svg { width: 100%; height: 100%; }
-.hd-chart-foot { font-size: .6rem; color: var(--black-400); margin-top: 8px; }
-
-.hd-stats2 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.hd-stat2 { border: 1px solid var(--border-default); border-radius: var(--radius-xs); padding: 10px; }
-.hd-stat2-icon { font-size: .85rem; margin-bottom: 6px; }
-.hd-stat2-row { display: flex; align-items: baseline; gap: 5px; margin-bottom: 3px; }
-.hd-stat2-bar { width: 34px; height: 11px; border-radius: 3px; background: var(--black-200); filter: blur(1.2px); }
-.hd-stat2-unit { font-size: .58rem; color: var(--text-subtle); }
-.hd-stat2-label { font-size: .64rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
-.hd-stat2-note { font-size: .58rem; color: var(--black-400); }
-
-.hero-dash-banner {
-  background: rgba(128,108,224,.08);
-  border-top: 1px solid var(--border-default);
-  padding: 11px 20px;
-  font-size: .74rem;
-  font-weight: 600;
-  color: var(--text);
-  text-align: center;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
+/* Report Store icon treatment: warm chip, neutral stroke. */
+.hd-ic {
+  width: 18px; height: 18px; flex-shrink: 0;
+  border-radius: var(--radius-2xs);
+  background: var(--white); color: #737373;
+  display: inline-flex; align-items: center; justify-content: center;
 }
+.hd-ic svg { width: 11px; height: 11px; }
+.hd-lock { color: var(--black-300); display: inline-flex; }
+.hd-lock svg { width: 10px; height: 10px; }
+.hd-info { color: var(--black-300); display: inline-flex; flex-shrink: 0; }
+.hd-info svg { width: 11px; height: 11px; }
+
+/* the masked-value language: a blurred bar where a real figure would sit */
+.hd-mask {
+  display: block; border-radius: 3px;
+  background: linear-gradient(90deg, var(--black-200), var(--black-100));
+  filter: blur(1.6px);
+}
+.hd-mask--val  { height: 8px;  width: 78%; margin: 4px 0 4px; }
+.hd-mask--chip { height: 6px;  width: 26px; flex-shrink: 0; filter: blur(1.3px); }
+
+/* --- KPI tile rows --- */
+.hd-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.hd-tile {
+  background: var(--section-bg-accent); border: 1px solid var(--border-soft);
+  border-radius: var(--radius-xs); padding: 6px 7px;
+  display: flex; flex-direction: column;
+}
+.hd-tile-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+.hd-tile-label { font-size: .53rem; font-weight: 600; color: var(--text); line-height: 1.25; margin-top: auto; }
+
+/* --- chart cards --- */
+.hd-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.hd-card {
+  background: var(--section-bg-accent); border: 1px solid var(--border-soft);
+  border-radius: var(--radius-xs); padding: 8px 9px;
+  display: flex; flex-direction: column;
+}
+.hd-card-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; }
+.hd-card-title { font-size: .62rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+
+.hd-axis-x { font-size: .5rem; color: var(--black-400); white-space: nowrap; }
+.hd-axis-y { font-size: .5rem; color: var(--black-400); white-space: nowrap; width: 38px; flex-shrink: 0; }
+
+/* vertical bars */
+.hd-vchart { display: flex; align-items: flex-end; gap: 5px; height: 62px; margin-top: auto; }
+.hd-vcol { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 3px; }
+.hd-vbar { width: 100%; border-radius: 3px 3px 0 0; background: linear-gradient(180deg, var(--chart-2), var(--chart-4)); }
+
+/* line */
+.hd-lchart { margin-top: auto; }
+.hd-line { width: 100%; height: 48px; display: block; }
+.hd-line-path { fill: none; stroke: var(--chart-2); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.hd-line-dots circle { fill: var(--chart-1); }
+.hd-axis-row { display: flex; justify-content: space-between; margin-top: 5px; }
+
+/* horizontal bars */
+.hd-hchart { display: flex; flex-direction: column; gap: 4px; margin-top: auto; }
+.hd-hrow { display: flex; align-items: center; gap: 5px; }
+.hd-hbar { height: 8px; border-radius: 3px; background: linear-gradient(90deg, var(--chart-2), var(--chart-4)); }
+
+/* donut + legend */
+.hd-mix { display: flex; align-items: center; gap: 10px; margin-top: auto; }
+.hd-donut { width: 62px; height: 62px; flex-shrink: 0; }
+.hd-donut-seg { fill: none; stroke-width: 14; }
+.hd-legend { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+.hd-leg-item { display: flex; align-items: center; gap: 5px; font-size: .53rem; color: var(--text-muted); }
+.hd-leg-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hd-leg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.hd-leg-dot--1 { background: var(--chart-1); }
+.hd-leg-dot--2 { background: var(--chart-2); }
+.hd-leg-dot--3 { background: var(--chart-3); }
+.hd-leg-dot--4 { background: var(--chart-4); }
 
 /* =========================================================
    SECTION HEADING PATTERN
@@ -619,30 +659,100 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 .sec-head h2 { margin-top: 6px; }
 
 /* =========================================================
-   USE-CASE TABLE — same visual language as the Operational
-   Intelligence data table (header wash · alt rows · 16px gutters)
+   REPORT TABLE — the one table system
+   ---------------------------------------------------------
+   Ported from the Market Definition table on ken-report.vercel.app, which is
+   the master reference. Deliberately generic (`.report-table`) so operational
+   benchmarking, comparison and matrix tables can adopt it unchanged: only the
+   cell CONTENT classes differ per table.
+
+   Neutral by construction — #fafafa header, #f2f2f2 rules, #737373 label ink.
+   The previous `--table-*` tokens were purple-tinted (border rgb(208,203,232),
+   header rgb(248,247,254)); brand accent now lives only in the icon badge.
    ========================================================= */
-.solve-table { width: 100%; border-collapse: collapse; font-size: .85rem; min-width: 640px; }
-.solve-table thead th {
-  background: var(--table-header-wash); color: var(--text);
-  padding: 11px 16px; text-align: left; font-family: var(--font-sans);
-  font-size: .7rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap;
-  border-bottom: 1px solid var(--table-border);
+.report-table-wrap {
+  border: 1px solid var(--black-100);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  /* clips the header wash and the first/last row to the radius */
+  overflow: hidden;
 }
-.solve-table tbody tr { border-bottom: 1px solid var(--table-row-divider); }
-.solve-table tbody tr:last-child { border-bottom: none; }
-.solve-table tbody tr:nth-child(even) { background: var(--table-alt-row); }
-.solve-table td { padding: 14px 16px; vertical-align: middle; }
-.solve-table th:first-child, .solve-table td:first-child { width: 300px; }
-.solve-table td:last-child { color: var(--text-muted); line-height: 1.55; }
-.solve-row-use { display: flex; align-items: center; gap: 12px; }
+/* the scroller is inside the rounded shell so the border never scrolls away */
+.report-table-scroll { overflow-x: auto; }
+.report-table {
+  width: 100%; border-collapse: collapse;
+  min-width: 460px;
+  font-family: var(--font-sans);
+}
+.report-table thead th {
+  padding: 10px 16px;
+  font-size: .75rem; font-weight: 700;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--black-500);
+  background: var(--black-50);
+  border-bottom: 1px solid var(--black-100);
+  text-align: left; white-space: nowrap;
+}
+.report-table tbody tr {
+  background: var(--white);
+  border-bottom: 1px solid var(--black-100);
+  vertical-align: top;
+  transition: background .4s ease-out;
+}
+.report-table tbody tr:last-child { border-bottom: none; }
+.report-table tbody tr:hover { background: var(--black-50); }
+.report-table td { padding: 12px 16px; }
+/* single vertical rule between the label column and the body column */
+.report-table th:first-child,
+.report-table td:first-child { border-right: 1px solid var(--black-100); }
+.report-table th:first-child,
+.report-table td:first-child { width: 240px; min-width: 180px; }
+/* body copy column */
+.report-table td:last-child {
+  font-size: .875rem; font-weight: 400; color: var(--black-500); line-height: 1.5;
+}
+
+/* Reference collapses to a stacked list rather than side-scrolling on phones. */
+@media (max-width: 700px) {
+  /* Stacking suits a label+prose table. A 5-column benchmark table would become
+     five unlabelled blocks per row, so `--data` keeps its columns and scrolls. */
+  .report-table:not(.report-table--data) { min-width: 0; }
+  .report-table:not(.report-table--data) thead { display: none; }
+  .report-table:not(.report-table--data) tbody,
+  .report-table:not(.report-table--data) tr,
+  .report-table:not(.report-table--data) td { display: block; width: 100%; }
+  .report-table:not(.report-table--data) td { padding: 8px 16px; border-right: none; }
+  /* the base `td:first-child` rule outranks the `td` reset above, so the
+     column rule has to be cleared at the same specificity */
+  .report-table:not(.report-table--data) td:first-child { width: auto; min-width: 0; padding-bottom: 2px; border-right: none; }
+  .report-table:not(.report-table--data) td:last-child { padding-top: 0; padding-bottom: 16px; }
+}
+
+/* ---- --data: dense multi-column benchmark tables ----
+   Same shell, header, rules and hover as the master; only the things a
+   5-column numeric grid genuinely needs differ. Cells hold one value each,
+   so they centre rather than top-align (the master top-aligns because its
+   cells are multi-line prose). */
+.report-table--data { min-width: 640px; }
+.report-table--data td { vertical-align: middle; }
+.report-table--data td:last-child { font-size: .8125rem; color: var(--black-600); }
+.report-table--data th:first-child,
+.report-table--data td:first-child { width: 200px; min-width: 160px; }
+.td-name { font-family: var(--font-sans); font-weight: 700; color: var(--black-900); font-size: .875rem; line-height: 1.4; }
+.td-sub  { font-family: var(--font-sans); font-size: .7rem; color: var(--black-500); margin-top: 2px; }
+
+/* ---- use-case table: cell content only, geometry comes from .report-table ---- */
+.solve-row-use { display: flex; align-items: flex-start; gap: 12px; }
 .solve-icon-badge {
   width: 28px; height: 28px; flex-shrink: 0; border-radius: var(--radius-xs);
   background: var(--icon-badge-bg); color: var(--icon-badge-fg);
   display: flex; align-items: center; justify-content: center;
 }
 .solve-icon-badge svg { width: 14px; height: 14px; }
-.solve-use-name { font-family: var(--font-sans); font-weight: 600; font-size: .88rem; color: var(--text); line-height: 1.3; }
+.solve-use-name {
+  font-family: var(--font-sans); font-weight: 700; font-size: .875rem;
+  color: var(--black-900); line-height: 1.5;
+}
 
 /* =========================================================
    ECOSYSTEM MATRIX — mind-map diagram (ported from Scope-of-Report pattern)
@@ -712,14 +822,6 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 .matrix-unlock-icon svg { width: 15px; height: 15px; }
 .matrix-unlock-desc { font-family: var(--font-sans); font-weight: 700; font-size: .8rem; color: rgba(0,0,0,.82); line-height: 1.5; margin-bottom: 14px; }
 
-.eco-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
-.eco-legend-item {
-  display: flex; align-items: center; gap: 6px; font-size: .75rem; color: var(--text-muted);
-  background: var(--section-bg-accent); border: 1px solid var(--border-default);
-  border-radius: var(--radius-full); padding: 5px 12px;
-}
-.eco-legend-item::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--accent-purple); flex-shrink: 0; }
-
 /* =========================================================
    BENCHMARKING APPROACH — 3x2 process-card grid (was a single linear
    dashed-connector row; restructured for a stronger, less "flat" read)
@@ -746,12 +848,6 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
   margin-bottom: var(--space-xl); flex-wrap: wrap;   /* owns heading->content for this section (its .sec-head is nested at mb:0) */
 }
 .profiles-head-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-.profiles-access-pill {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(128,108,224,.1); border: 1px solid rgba(128,108,224,.25);
-  border-radius: var(--radius-full); padding: 5px 13px;
-  font-size: .74rem; font-weight: 700; color: var(--accent-purple);
-}
 .profiles-unlocked-count { font-size: .78rem; font-weight: 600; color: var(--text-subtle); display: flex; align-items: center; gap: 5px; }
 
 /* --- V1 / V2 view toggle (section-scoped, quiet) --- */
@@ -796,7 +892,6 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
               stroke var(--duration-fast) var(--ease-smooth),
               stroke-width var(--duration-fast) var(--ease-smooth);
 }
-.mm-collapsed .mm-child { display: none; }
 
 /* --- Scroll reveal ---
    The FINISHED state is the default, so the graph is fully visible if JS or
@@ -851,7 +946,6 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
   .mm-link-lit { stroke-dashoffset: 0; transition: opacity 120ms linear; }
 }
 
-
 .profiles-grid-wrap { position: relative; }
 .profiles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-lg); }
 .profile-card {
@@ -888,12 +982,14 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 }
 .profiles-unlock-card {
   pointer-events: auto; text-align: center; max-width: 300px; width: 100%;
-  background: var(--white); border: 1px solid var(--border-soft); border-radius: 14px;
+  background: var(--white); border: 1px solid var(--border-soft); border-radius: var(--radius-xs);
   box-shadow: var(--shadow-overlay-card); padding: 18px 20px;
 }
+/* Circular lock badge on the Report Store warm fill — the shape stays a
+   circle; only the blue --accent-perano (#dfeafa) fill was the outlier. */
 .profiles-unlock-icon {
   width: 36px; height: 36px; margin: 0 auto 12px; border-radius: 50%;
-  background: var(--accent-perano); color: var(--black);
+  background: var(--icon-badge-bg); color: var(--icon-badge-fg);
   display: flex; align-items: center; justify-content: center;
 }
 .profiles-unlock-icon svg { width: 15px; height: 15px; }
@@ -932,20 +1028,6 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 .tab-panel.show { display: block; }
 
 .kpi-table-wrap { position: relative; }
-.table-wrap { overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--table-border); }
-.data-table { width: 100%; border-collapse: collapse; font-size: .81rem; min-width: 640px; }
-.data-table thead th {
-  background: var(--table-header-wash); color: var(--text);
-  padding: 11px 16px; text-align: left; font-family: var(--font-sans);
-  font-size: .7rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap;
-  border-bottom: 1px solid var(--table-border);
-}
-.data-table tbody tr { border-bottom: 1px solid var(--table-row-divider); transition: background .1s; }
-.data-table tbody tr:last-child { border-bottom: none; }
-.data-table tbody tr:nth-child(even) { background: var(--table-alt-row); }
-.data-table td { padding: 12px 16px; vertical-align: middle; }
-.td-name { font-family: var(--font-sans); font-weight: 600; color: var(--text); font-size: .85rem; }
-.td-sub  { font-size: .7rem; color: var(--text-subtle); margin-top: 1px; }
 
 .kpi-cell-blur {
   display: inline-block; width: 56px; height: 13px; border-radius: 3px;
@@ -969,21 +1051,27 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 /* =========================================================
    FINANCIAL SECTION
    ========================================================= */
-.fin-snapshot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+.fin-snapshot-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 1fr; gap: 14px; margin-bottom: 24px; }
 .fin-snap-card {
-  background: var(--white); border: 1px solid #e5e5e5; border-radius: 4px;
-  padding: 16px 18px; box-shadow: var(--chart-card-shadow); position: relative; overflow: hidden;
+  background: var(--white); border: 1px solid var(--black-100); border-radius: var(--radius-sm);
+  padding: 16px 18px; position: relative; overflow: hidden;
 }
 .fin-snap-label {
   font-family: var(--font-sans); font-size: .688rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
   color: var(--black); margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  /* Always reserve two lines: at ~1280 some titles wrap and some do not, and
+     without this the six charts start at different heights inside equal cards. */
+  min-height: 36px;
 }
 .fin-badge {
   display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-sans);
   font-size: .58rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
   padding: 3px 8px; border-radius: var(--radius-full); white-space: nowrap; flex-shrink: 0;
 }
-.fin-badge--preview { background: rgba(128,108,224,.1); color: var(--accent-purple); border: 1px solid rgba(128,108,224,.25); }
+/* DS Badge theme="neutral" — purple is reserved for chart fills, not badges.
+   Stays distinguishable from --locked by the darker ink + lighter fill, with
+   the label text ("Sample Preview" vs "Locked") carrying the real meaning. */
+.fin-badge--preview { background: var(--v1-badge-bg); color: var(--black-700); border: 1px solid var(--black-200); }
 .fin-badge--locked { background: var(--section-bg-accent); color: var(--text-subtle); border: 1px solid var(--border-default); }
 
 .fin-bars {
@@ -1008,7 +1096,36 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 
 /* Locked snapshot card — blurred "ghost" chart behind a floating unlock badge,
    same premium-gate language as the Ecosystem/Profiles/KPI unlock overlays. */
-.fin-locked-region { position: relative; height: 82px; }
+/* Sizes to its chart now that it wraps a real SVG — the old fixed 82px was
+   for the ghost-bar placeholder and clipped/overflowed the real charts.
+   The blur is the actual gate: company-wise values stay unreadable in preview
+   while the chart's shape and type remain visible. */
+.fin-locked-region { position: relative; }
+
+/* Hover/focus unlock gate on a locked card. The chart stays blurred underneath
+   the whole time — nothing sensitive animates into legibility, the overlay
+   only adds a wash plus the lock and the CTA. The CTA points at the existing
+   full-report anchor; no new form. */
+.fin-unlock {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  background: rgba(255,255,255,.74);
+  opacity: 0; translate: 0 3px; pointer-events: none;
+  transition: opacity 200ms var(--ease-smooth), translate 200ms var(--ease-smooth);
+}
+.fin-snap-card:not(.is-preview):hover .fin-unlock,
+.fin-snap-card:not(.is-preview):focus-within .fin-unlock {
+  opacity: 1; translate: 0 0; pointer-events: auto;
+}
+/* border firms up slightly on hover — the only other thing that moves */
+.fin-snap-card:not(.is-preview) { transition: border-color 200ms var(--ease-smooth); }
+.fin-snap-card:not(.is-preview):hover,
+.fin-snap-card:not(.is-preview):focus-within { border-color: var(--black-200); }
+@media (prefers-reduced-motion: reduce) {
+  .fin-unlock { transition: opacity 120ms linear; translate: 0 0; }
+  .fin-snap-card:not(.is-preview) { transition: none; }
+}
+.fin-locked-region .fc-svg { filter: blur(3.5px); opacity: .72; }
 .fin-ghost-bars { display: flex; align-items: flex-end; gap: 8px; height: 100%; filter: blur(4px); opacity: .5; }
 .fin-ghost-bars .fin-bar-col { flex: 1; min-width: 0; height: 100%; display: flex; align-items: flex-end; }
 .fin-ghost-bars .fin-bar { width: 100%; border-radius: 3px 3px 0 0; background: var(--accent-purple); }
@@ -1019,7 +1136,7 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 }
 
 .fin-note {
-  background: var(--tint-soft); border: 1px solid var(--border-soft); border-radius: var(--radius-sm);
+  background: var(--tint-soft); border: 1px solid var(--black-100); border-radius: var(--radius-sm);
   padding: 16px 20px; margin-bottom: var(--space-lg);
   display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: space-between;
 }
@@ -1031,11 +1148,6 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 }
 .fin-note-icon svg { width: 15px; height: 15px; }
 .fin-note p { font-size: .83rem; color: var(--text); line-height: 1.5; }
-.fin-meta { width: 100%; border-collapse: collapse; font-size: .82rem; border: 1px solid var(--border-default); border-radius: var(--radius-sm); overflow: hidden; }
-.fin-meta thead th { background: var(--section-bg-accent); padding: 10px 16px; text-align: left; font-family: var(--font-sans); font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text); }
-.fin-meta tbody td { padding: 11px 16px; border-bottom: 1px solid var(--border-default); }
-.fin-meta tbody tr:last-child td { border-bottom: none; }
-.fin-meta td:first-child { font-weight: 600; color: var(--text); width: 180px; }
 
 /* =========================================================
    COST STRUCTURE
@@ -1060,9 +1172,22 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 .donut-legend-name { color: var(--text); flex: 1; min-width: 0; }
 .donut-legend-pct { color: var(--chart-tick); flex-shrink: 0; }
 @media (max-width: 580px) { .donut-row { flex-direction: column; align-items: flex-start; gap: 20px; } }
-/* Sample-composition legend — carries size + respondent detail alongside the ring */
+/* Sample-composition legend — carries size + respondent detail alongside the ring.
+   Two columns, not one: as a single 650px column every title row stopped at
+   ~40% and left 417-522px blank, while the descriptions ran ~95 characters.
+   Halving the column fixes both at once — titles fill their cell, descriptions
+   wrap at ~45 characters. The ring grows to match the block's new weight. */
 .donut-row--sample { align-items: center; gap: 36px; margin-bottom: 16px; }
-.donut-row--sample .donut-legend { gap: 14px; }
+.donut-row--sample .donut { width: 200px; height: 200px; }
+.donut-row--sample .donut-legend {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 28px; align-content: center;
+}
+/* Below the two-column threshold the cells would be too narrow to be worth it. */
+@media (max-width: 1080px) {
+  .donut-row--sample .donut-legend { grid-template-columns: 1fr; gap: 14px; }
+  .donut-row--sample .donut { width: 160px; height: 160px; }
+}
 .sample-legend-row { display: flex; align-items: flex-start; gap: 10px; }
 .sample-legend-row .donut-legend-dot { margin-top: 5px; }
 .sample-legend-body { flex: 1; min-width: 0; }
@@ -1109,8 +1234,6 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 .insight-card h3 { font-size: .9rem; color: var(--text); margin-bottom: 6px; }
 .insight-card p { font-size: .82rem; color: var(--text-muted); line-height: 1.55; }
 .ic-locked { display: flex; align-items: center; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-default); font-size: .72rem; color: var(--text-subtle); }
-
-
 
 /* =========================================================
    METHODOLOGY
@@ -1193,15 +1316,40 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 }
 .faq-chev { color: #525252; display: inline-flex; flex-shrink: 0; }
 .faq-chev svg { width: 20px; height: 20px; }
-.faq-a { display: none; padding: 0 16px 16px; font-size: 1rem; color: #525252; line-height: 1.5; }
-.faq-row.open .faq-a { display: block; }
+/* Height transition via grid-template-rows 0fr -> 1fr. `display:none` cannot
+   transition at all, which is what made the accordion jump. This needs no
+   magic max-height, so every answer animates at its own true height. */
+.faq-a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 220ms var(--ease-smooth); }
+.faq-row.open .faq-a { grid-template-rows: 1fr; }
+/* The collapsing track clips CONTENT, not padding — padding on this element
+   left every closed row 16px tall. It carries no padding of its own; the
+   spacing lives on .faq-a-body, which gets clipped with everything else. */
+.faq-a-inner { overflow: hidden; opacity: 0; transition: opacity 200ms var(--ease-smooth); }
+.faq-row.open .faq-a-inner { opacity: 1; }
+.faq-a-body { padding: 0 16px 16px; font-size: 1rem; color: #525252; line-height: 1.5; }
+.faq-chev svg { transition: rotate 220ms var(--ease-smooth); }
+.faq-row.open .faq-chev svg { rotate: 180deg; }
+@media (prefers-reduced-motion: reduce) {
+  .faq-a, .faq-a-inner, .faq-chev svg { transition: none; }
+}
 
 .faq-contact {
   margin-top: var(--space-2xl); padding: var(--space-xl); border-radius: var(--radius-sm);
   background: var(--tint-soft); border: 1px solid var(--border-soft);
   display: flex; flex-direction: column; gap: 14px;
 }
-.faq-contact-title { font-weight: 600; font-size: .9rem; color: var(--text); margin-bottom: 4px; }
+/* Serif display at --text-lg (25px), following the h1/h2 convention:
+   --font-serif, weight 400, line-height 1.2, -.02em. Was .9rem/600 sans,
+   which was off the type scale and lighter than the FAQ questions above. */
+.faq-contact-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -.02em;
+  color: var(--black-900);
+  margin-bottom: 6px;
+}
 .faq-contact-desc { font-size: .82rem; color: var(--text-muted); }
 /* Promoted from DS CTALink to DS Button variant="brand" (V2's `.btn-primary`)
    per client direction — the FAQ close is a final CTA, which V2's own button
@@ -1246,13 +1394,28 @@ footer strong { color: rgba(255,255,255,.8); }
 /* =========================================================
    RESPONSIVE
    ========================================================= */
+/* The preview loses width fastest below the full container, so tighten type
+   and spacing there rather than letting the card grow taller than it is wide. */
+@media (max-width: 1200px) {
+  .hero-grid { grid-template-columns: 1.16fr 1fr; gap: 26px; }
+  .hero-dash { padding: 10px; gap: 8px; }
+  .hd-tiles, .hd-charts { gap: 6px; }
+  .hd-card { padding: 8px 9px; }
+  .hd-card-title { font-size: .58rem; }
+  .hd-tile-label { font-size: .52rem; }
+  .hd-vchart { height: 66px; }
+  .hd-line { height: 50px; }
+  .hd-donut { width: 64px; height: 64px; }
+  .hd-leg-item { font-size: .5rem; }
+  .hd-axis-y { width: 33px; }
+}
+
 @media (max-width: 960px) {
   .mobile-bar { display: flex; }
   body { padding-bottom: 72px; }
 
   .hero-grid { grid-template-columns: 1fr; gap: 32px; }
   .hero-dash { display: none; }
-  .solve-grid { grid-template-columns: repeat(2, 1fr); }
   .approach-grid { grid-template-columns: repeat(2, 1fr); }
   .fin-snapshot-grid { grid-template-columns: repeat(2, 1fr); }
   .cost-layout { grid-template-columns: 1fr; }
@@ -1264,7 +1427,6 @@ footer strong { color: rgba(255,255,255,.8); }
   .header-nav { display: none; }
   .ham { display: flex; }
   .header-inner .btn { display: none; }
-  .toc-eyebrow { display: none; }
 }
 @media (max-width: 580px) {
   .fin-snapshot-grid { grid-template-columns: 1fr; }
@@ -1297,17 +1459,6 @@ footer strong { color: rgba(255,255,255,.8); }
 
 /* Shared card shell — V1's `rounded-[var(--radius-card)] border border-soft`, flat (no shadow) */
 .v1-card { background: var(--white); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); }
-/* DS IconBox · size="sm" (44px box / 20px glyph) · shape="square" (--radius-sm) · color="purple" */
-/* Colour matched to the Report Store "Upcoming Reports" badge — the same
-   --icon-badge-* pair `.approach-icon` and every other V2 content icon already
-   uses, so the ported V1 icons stop being the page's only purple ones.
-   Geometry stays at the DS IconBox size="sm" spec (44px box / 20px glyph). */
-.v1-iconbox {
-  width: 44px; height: 44px; flex-shrink: 0; border-radius: var(--radius-sm);
-  background: var(--icon-badge-bg); color: var(--icon-badge-fg);
-  display: flex; align-items: center; justify-content: center;
-}
-.v1-iconbox svg { width: 20px; height: 20px; stroke-width: 1.8; }
 /* DS Badge variant="pill" theme="periwinkle" */
 .v1-pill {
   display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
@@ -1328,25 +1479,246 @@ footer strong { color: rgba(255,255,255,.8); }
 .v1-card-eyebrow-icon svg { width: 14px; height: 14px; }
 .v1-card-eyebrow > span:not(.v1-card-eyebrow-icon) { font-weight: 600; text-transform: uppercase; letter-spacing: .03em; color: var(--black-900); }
 
-/* ---- Executive Summary ---- */
-.es-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.es-kpi { padding: 12px; }
-.es-kpi-head { display: flex; align-items: center; gap: 10px; }
-.es-kpi-label { font-size: .78rem; color: rgba(0,0,0,.65); line-height: 1.3; }
-.es-kpi-value {
-  margin-top: 12px; font-family: var(--font-sans); font-weight: 700;
-  font-variant-numeric: tabular-nums; white-space: nowrap;
-  font-size: 1.25rem; color: var(--black-900);
+/* ---- Financial charts (hand-built SVG, no chart library) ----
+   Six chart types from the approved reference: vertical bars, area+line,
+   horizontal bars, waterfall, gauge, and a dual-axis bar+line combo.
+   Purple is a chart fill here — that is the one place the DS allows it. */
+.fc-svg { width: 100%; height: auto; display: block; margin-top: 10px; overflow: visible; }
+.fc-grid { stroke: var(--chart-grid); stroke-width: 1; }
+.fc-tick { font-family: var(--font-sans); font-size: 8.5px; fill: var(--chart-tick); }
+.fc-val { font-family: var(--font-sans); font-size: 10px; font-weight: 700; fill: var(--black-900); }
+/* Two of the five % labels have to sit over a bar — the line and the bar
+   tops are only 2% of the plot apart at FY24. A white halo keeps them
+   legible on any ramp step (chart-1 gives dark text only 3.33:1). */
+.fc-val--line {
+  fill: var(--chart-1);
+  stroke: var(--white); stroke-width: 2.5px; stroke-linejoin: round;
+  paint-order: stroke fill;
 }
-.es-kpi-value .es-unit { margin-left: 4px; font-size: .85rem; }
-.es-kpi-rule { margin: 12px 0 8px; height: 1px; background: var(--border-soft); }
-.es-kpi-sub { font-size: .78rem; color: rgba(0,0,0,.5); line-height: 1.4; }
-.es-insight-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: var(--space-lg); }
-.es-insight { padding: 12px; }
-.es-insight h3 { margin-top: 12px; font-family: var(--font-sans); font-weight: 500; font-size: .88rem; color: var(--text); line-height: 1.35; }
-.es-insight p { margin-top: 6px; font-size: .78rem; color: rgba(0,0,0,.6); line-height: 1.6; }
-.es-footer { margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.fc-track { fill: var(--black-100); }
+.fc-line { fill: none; stroke: var(--chart-2); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.fc-dot { fill: var(--chart-2); }
+/* PAT margin rides over the bars, so its line and dots take the darkest ink
+   and the dots get a white keyline to stay legible against a filled bar. */
+.fc-line--pat { stroke: var(--chart-1); }
+.fc-dot--pat { fill: var(--chart-1); stroke: var(--white); stroke-width: 1.5; }
+.fc-connector { stroke: var(--chart-axis); stroke-width: 1; stroke-dasharray: 2 2; }
+
+/* gauge */
+.fc-gauge-track { fill: none; stroke: var(--black-100); stroke-width: 22; stroke-linecap: round; }
+.fc-gauge-fill  { fill: none; stroke: var(--chart-2); stroke-width: 22; stroke-linecap: round; }
+.fc-gauge-cap   { fill: var(--chart-1); }
+.fc-gauge-val   { font-family: var(--font-sans); font-size: 26px; font-weight: 700; fill: var(--black-900); }
+.fc-gauge-sub   { font-family: var(--font-sans); font-size: 9px; fill: var(--chart-tick); }
+/* three-period strip under the gauge, per the reference */
+.fc-strip       { fill: var(--black-50); }
+.fc-strip-rule  { stroke: var(--black-100); stroke-width: 1; }
+.fc-strip-val   { font-family: var(--font-sans); font-size: 11px; font-weight: 700; fill: var(--black-900); }
+.fc-strip-val--now { fill: var(--chart-1); }
+.fc-strip-yr    { font-family: var(--font-sans); font-size: 8px; fill: var(--chart-tick); }
+
+/* legend */
+/* The legend sits in the chart's own empty footer band (below the FY labels,
+   viewBox y158-180) instead of in flow. In flow it added ~43px to the PAT card,
+   and grid-auto-rows:1fr then pushed that height onto all six cards as dead space. */
+.fc-legend {
+  position: absolute; left: 18px; right: 18px; bottom: 14px;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px;
+}
+.fc-legend-item { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-sans); font-size: .62rem; color: var(--text-subtle); }
+.fc-legend-swatch { width: 10px; height: 10px; border-radius: 2px; background: var(--chart-2); }
+.fc-legend-line { width: 14px; height: 2px; border-radius: 2px; background: var(--chart-1); position: relative; }
+
+/* ---- ReportVisualSection (image-led report sections) ----
+   Reserved area for a supplied visual. Holds its aspect ratio with or without
+   an image so dropping the final artwork in never shifts page height. Empty
+   state is a neutral surface using existing tokens — no dummy chart, no
+   placeholder art, no text inside the frame. */
+.rvs-figure { margin: 0; }
+.rvs-frame {
+  width: 100%;
+  aspect-ratio: 16 / 9;                 /* overridden per-section via the style prop */
+  background: var(--section-bg-accent);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.rvs-img { width: 100%; height: auto; object-fit: contain; display: block; }
+.rvs-source {
+  margin-top: 12px;
+  font-family: var(--font-sans); font-size: .72rem;
+  color: var(--text-subtle); line-height: 1.5;
+}
+
+/* --- Expandable image + full-screen lightbox ------------------------------
+   Ported from the interaction on ken-pov-bice.vercel.app: click a report
+   visual to open it full-screen. Values match that implementation; where it
+   used its own tokens the equivalent token here is substituted. */
+.expandable-image {
+  display: block; position: relative; width: 100%;
+  padding: 0; border: 0; background: none; text-align: left; color: inherit;
+  cursor: zoom-in;
+}
+.expandable-image img { width: 100%; height: auto; display: block; }
+.expandable-image > span {
+  position: absolute; bottom: .7rem; right: .7rem;
+  display: inline-flex; align-items: center; min-height: 1.75rem;
+  padding: .28rem .55rem; border-radius: var(--radius-xs);
+  background: rgba(0,0,0,.78); border: 1px solid rgba(255,255,255,.22);
+  color: var(--white); font-size: var(--text-2xs); font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; line-height: 1;
+  /* Hidden until hover — the image should read as the content, not as a
+     control. Touch devices have no hover, so the 620px block below keeps
+     it permanently visible there. */
+  opacity: 0; transform: translateY(0);
+  transition: opacity var(--duration-fast, .2s), transform var(--duration-fast, .2s);
+}
+.expandable-image:hover > span,
+.expandable-image:focus-visible > span { opacity: 1; }
+.expandable-image:focus-visible { outline: 2px solid var(--brand-red); outline-offset: 3px; }
+
+@keyframes lb-in { from { opacity: 0; } to { opacity: 1; } }
+
+.lightbox {
+  position: fixed; inset: 0; z-index: var(--z-modal);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.25rem; background: rgba(0,0,0,.72);
+  animation: lb-in .16s ease-out;
+}
+.lightbox-inner {
+  display: flex; flex-direction: column;
+  width: min(1180px, 100%); max-height: 92vh; overflow: auto;
+  background: var(--white); border-radius: var(--radius-sm);
+}
+.lightbox-bar {
+  position: sticky; top: 0; z-index: 1;
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--white); border-bottom: 1px solid var(--border-soft);
+}
+.lightbox-label {
+  flex: 1; font-family: var(--font-sans); font-size: var(--text-2xs); font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--text-subtle);
+}
+.lightbox-close {
+  display: inline-flex; padding: .4rem;
+  border: 1px solid var(--border-soft); border-radius: var(--radius-xs);
+  background: none; color: var(--text-muted); cursor: pointer;
+}
+.lightbox-close:hover { color: var(--text); border-color: var(--border-default); }
+.lightbox-close:focus-visible { outline: 2px solid var(--brand-red); outline-offset: 2px; }
+.lightbox-hint {
+  margin: 0; padding: 0 2rem 1.5rem;
+  font-size: var(--text-2xs); color: var(--text-subtle);
+}
+
+.image-lightbox { padding: 1rem; }
+.image-lightbox-inner { width: min(1500px, 100%); max-height: 94vh; background: var(--white); }
+.image-lightbox-body { display: grid; place-items: center; padding: 1rem; background: var(--section-bg-accent); }
+.image-lightbox-body img {
+  width: 100%; max-height: calc(94vh - 8rem); object-fit: contain; display: block;
+  background: var(--white); border: 1px solid var(--border-soft); border-radius: var(--radius-xs);
+}
+
+@media (max-width: 620px) {
+  .expandable-image > span { opacity: 1; transform: none; }
+  .image-lightbox { padding: .5rem; }
+  .image-lightbox-body { padding: .65rem; }
+  .image-lightbox-body img { max-height: calc(94vh - 7rem); }
+}
+
+/* ---- Executive Summary ----
+   Open editorial treatment, not cards. The KPI row is one strip bounded by two
+   hairlines with column rules between metrics; findings are a 2x2 grid divided
+   by rules rather than four rounded boxes. Nothing new is introduced — every
+   value below is an existing Aura token (--space-*, --border-soft, --black-*,
+   --text-*, --font-sans). */
+.es-kpi-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--border-soft);
+  border-bottom: 1px solid var(--border-soft);
+  padding: var(--space-xl) 0;
+}
+.es-kpi { padding: 0 var(--space-lg); }
+.es-kpi + .es-kpi { border-left: 1px solid var(--border-soft); }
+.es-kpi:first-child { padding-left: 0; }
+.es-kpi:last-child  { padding-right: 0; }
+.es-kpi-label {
+  display: block; font-family: var(--font-sans);
+  font-size: .7rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--text-subtle);
+}
+/* The value is the loudest thing in the section — 2rem against the 0.7rem label
+   is the hierarchy the old 1.25rem card value never had. */
+.es-kpi-value {
+  margin-top: 10px; font-family: var(--font-sans); font-weight: 700;
+  font-size: 2rem; line-height: 1.05; letter-spacing: -.02em;
+  color: var(--black-900); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.es-kpi-value .es-unit {
+  margin-left: 6px; font-size: .85rem; font-weight: 600;
+  letter-spacing: 0; color: var(--text-subtle);
+}
+.es-kpi-sub { margin-top: 8px; font-size: .78rem; color: var(--text-subtle); line-height: 1.45; }
+
+.es-findings { margin-top: var(--space-xl); display: grid; grid-template-columns: 1fr 1fr; }
+.es-finding { display: flex; gap: 14px; padding: var(--space-xl) 0; }
+.es-finding:nth-child(odd)  { padding-right: var(--space-2xl); border-right: 1px solid var(--border-soft); }
+.es-finding:nth-child(even) { padding-left: var(--space-2xl); }
+.es-finding:nth-child(n+3)  { border-top: 1px solid var(--border-soft); }
+.es-finding-num {
+  flex-shrink: 0; padding-top: 2px;
+  font-family: var(--font-sans); font-size: .78rem; font-weight: 700;
+  letter-spacing: .06em; color: var(--black-400); font-variant-numeric: tabular-nums;
+}
+.es-finding h3 {
+  font-family: var(--font-sans); font-weight: 600; font-size: .95rem;
+  color: var(--text); line-height: 1.35;
+}
+.es-finding p { margin-top: 8px; font-size: .82rem; color: var(--text-subtle); line-height: 1.65; }
+/* Supporting points under a finding. Inherits the paragraph's type and colour
+   exactly — only a hairline marker is added, so nothing new enters the type
+   scale or the palette. */
+.es-finding-points { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; list-style: none; }
+.es-finding-points li {
+  position: relative; padding-left: 14px;
+  font-size: .82rem; color: var(--text-subtle); line-height: 1.55;
+}
+.es-finding-points li::before {
+  content: ''; position: absolute; left: 0; top: .62em;
+  width: 5px; height: 1px; background: var(--black-300);
+}
+
+/* Light surface, same treatment as .fin-note: --tint-soft fill on the
+   --black-100 hairline at --radius-sm, which is the shell every other
+   block on this page uses. */
+.es-footer {
+  margin-top: var(--space-xl); display: flex; align-items: center;
+  justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  background: var(--tint-soft); border: 1px solid var(--black-100);
+  border-radius: var(--radius-sm); padding: 16px 20px;
+}
 .es-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+
+@media (max-width: 1023px) {
+  .es-kpi-strip { grid-template-columns: repeat(2, 1fr); row-gap: var(--space-xl); }
+  .es-kpi:nth-child(odd)  { padding-left: 0; border-left: none; }
+  .es-kpi:nth-child(even) { padding-right: 0; }
+  .es-kpi:nth-child(n+3)  { border-top: 1px solid var(--border-soft); padding-top: var(--space-xl); }
+}
+@media (max-width: 767px) {
+  .es-kpi-strip { grid-template-columns: 1fr; row-gap: 0; padding: var(--space-lg) 0; }
+  .es-kpi { padding: var(--space-lg) 0; border-left: none !important; }
+  .es-kpi + .es-kpi { border-top: 1px solid var(--border-soft); }
+  .es-kpi:nth-child(n+3) { padding-top: var(--space-lg); }
+  .es-findings { grid-template-columns: 1fr; }
+  .es-finding, .es-finding:nth-child(odd), .es-finding:nth-child(even) {
+    padding: var(--space-lg) 0; border-right: none;
+  }
+  .es-finding + .es-finding { border-top: 1px solid var(--border-soft); }
+  .es-footer { flex-direction: column; align-items: flex-start; }
+}
 
 /* ---- Strategic Recommendations (Action Plan) ---- */
 .ap-row { display: grid; grid-template-columns: 44fr 56fr; gap: 24px; align-items: start; margin-top: 24px; }
@@ -1442,13 +1814,10 @@ footer strong { color: rgba(255,255,255,.8); }
   .ns-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 767px) {
-  .es-kpi-grid { grid-template-columns: repeat(2, 1fr); }
-  .es-insight-grid { grid-template-columns: 1fr; }
   .es-footer { flex-direction: column; align-items: flex-start; }
   .ns-closing { flex-direction: column; align-items: flex-start; }
 }
 @media (max-width: 559px) {
-  .es-kpi-grid { grid-template-columns: 1fr; }
 }
 
 /* Competitive Ecosystem Matrix — hidden per client request.
@@ -1456,9 +1825,12 @@ footer strong { color: rgba(255,255,255,.8); }
    restored by removing this one rule. Its TOC/drawer entries are removed (a
    nav item pointing at a display:none target is a dead link); the reveal
    auto-tagger already skips display:none blocks, so nothing else changes. */
-#ecosystem { display: none; }
 #insights  { display: none; }
 #methodology { display: none; }
+#cost-structure { display: none; }
+#action-plan { display: none; }
+#execution-plan { display: none; }
+#next-steps { display: none; }
 
 /* DS parity: the shimmer layer carries motion-reduce:transition-none. */
 @media (prefers-reduced-motion: reduce) {
@@ -1483,8 +1855,8 @@ footer strong { color: rgba(255,255,255,.8); }
    collapsed the mindmap once already).
    ========================================================= */
 [data-reveal] {
-  transition: opacity var(--reveal-dur, 480ms) var(--ease-smooth) var(--reveal-delay, 0ms),
-              translate var(--reveal-dur, 480ms) var(--ease-smooth) var(--reveal-delay, 0ms);
+  transition: opacity var(--reveal-dur, 420ms) var(--ease-smooth) var(--reveal-delay, 0ms),
+              translate var(--reveal-dur, 420ms) var(--ease-smooth) var(--reveal-delay, 0ms);
 }
 .js-reveal [data-reveal]:not(.is-revealed) {
   opacity: 0;
@@ -1501,8 +1873,57 @@ footer strong { color: rgba(255,255,255,.8); }
 [data-reveal="left"]    { --reveal-x: -14px; --reveal-y: 0px; }
 [data-reveal="right"]   { --reveal-x: 14px;  --reveal-y: 0px; }
 
+/* tableRowReveal — container, then header, then rows. Short travel and a
+   shorter duration than a block so 7-22 rows still settle quickly. Cells are
+   never targeted. */
+[data-reveal="row"]     { --reveal-y: 8px;  --reveal-dur: 340ms; }
+
+/* chartReveal — the card fades in via the normal item preset; the marks inside
+   then draw once. Bars scale from their own baseline (transform-box: fill-box
+   keeps the origin on the rect, not the SVG viewport); lines and arcs use
+   pathLength="1" so one dash length works for every path regardless of its
+   real geometry. Locked charts animate behind their existing blur, so no
+   sensitive value is ever legible mid-animation. */
+.fc-bar, .fc-line, .fc-gauge-fill, .fc-dot, .fc-area, .fc-connector {
+  transition: transform var(--chart-dur, 620ms) var(--ease-smooth) var(--chart-delay, 120ms),
+              stroke-dashoffset var(--chart-dur, 620ms) var(--ease-smooth) var(--chart-delay, 120ms),
+              opacity 320ms var(--ease-smooth) var(--chart-delay, 120ms);
+}
+.fc-bar          { transform-box: fill-box; }
+.fc-bar--v       { transform-origin: bottom; }
+.fc-bar--h       { transform-origin: left; }
+.js-reveal [data-reveal]:not(.is-revealed) .fc-bar--v { transform: scaleY(0); }
+.js-reveal [data-reveal]:not(.is-revealed) .fc-bar--h { transform: scaleX(0); }
+.js-reveal [data-reveal]:not(.is-revealed) .fc-line,
+.js-reveal [data-reveal]:not(.is-revealed) .fc-gauge-fill { stroke-dashoffset: 1; }
+.js-reveal [data-reveal]:not(.is-revealed) .fc-dot,
+.js-reveal [data-reveal]:not(.is-revealed) .fc-area,
+.js-reveal [data-reveal]:not(.is-revealed) .fc-connector { opacity: 0; }
+.fc-line, .fc-gauge-fill { stroke-dasharray: 1; stroke-dashoffset: 0; }
+/* dots and the area wash land after the line has drawn */
+.js-reveal .fc-dot, .js-reveal .fc-area { --chart-delay: 520ms; }
+
+/* imageReveal — for the supplied report exhibits. Scale stays at 0.99 so it
+   reads as settling, not zooming. */
+.rvs-img {
+  transition: opacity 450ms var(--ease-smooth), translate 450ms var(--ease-smooth),
+              scale 450ms var(--ease-smooth);
+}
+.js-reveal [data-reveal]:not(.is-revealed) .rvs-img { opacity: 0; translate: 0 12px; scale: .99; }
+
 /* Reduced motion: fade only, no travel, and faster so it never delays reading. */
 @media (prefers-reduced-motion: reduce) {
   [data-reveal] { transition: opacity 200ms linear; }
   .js-reveal [data-reveal]:not(.is-revealed) { opacity: 0; translate: 0 0; }
+  /* No draw, no travel, no scale — the chart and the image are simply there. */
+  .fc-bar, .fc-line, .fc-gauge-fill, .fc-dot, .fc-area, .fc-connector,
+  .rvs-img { transition: none; }
+  .js-reveal [data-reveal]:not(.is-revealed) .fc-bar--v,
+  .js-reveal [data-reveal]:not(.is-revealed) .fc-bar--h { transform: none; }
+  .js-reveal [data-reveal]:not(.is-revealed) .fc-line,
+  .js-reveal [data-reveal]:not(.is-revealed) .fc-gauge-fill { stroke-dashoffset: 0; }
+  .js-reveal [data-reveal]:not(.is-revealed) .fc-dot,
+  .js-reveal [data-reveal]:not(.is-revealed) .fc-area,
+  .js-reveal [data-reveal]:not(.is-revealed) .fc-connector { opacity: 1; }
+  .js-reveal [data-reveal]:not(.is-revealed) .rvs-img { opacity: 0; translate: 0 0; scale: 1; }
 }

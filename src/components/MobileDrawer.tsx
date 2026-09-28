@@ -7,13 +7,11 @@ export function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => 
         <span className="drawer-label">Report Contents</span>
         <a href="#overview" onClick={onClose}>What This Report Helps You Solve</a>
         <a href="#exec-summary" onClick={onClose}>Key Strategic Findings</a>
-        <a href="#profiles" onClick={onClose}>Competitive Positioning Matrix</a>
+        <a href="#ecosystem" onClick={onClose}>Ecosystem Iran</a>
+        <a href="#profiles" onClick={onClose}>Competitive Positioning &amp; Capability Benchmark</a>
+        <a href="#market-share" onClick={onClose}>Market Share Waterfall by Player</a>
         <a href="#kpis" onClick={onClose}>Key Operational Performance Metrics</a>
         <a href="#financials" onClick={onClose}>Core Financial Performance Metrics</a>
-        <a href="#cost-structure" onClick={onClose}>Cost Structure Analysis</a>
-        <a href="#action-plan" onClick={onClose}>Strategic Recommendations</a>
-        <a href="#execution-plan" onClick={onClose}>Implementation Roadmap</a>
-        <a href="#next-steps" onClick={onClose}>Conclusion &amp; Next Steps</a>
         <a href="#approach" onClick={onClose}>Benchmarking Approach</a>
         <a href="#sample-composition" onClick={onClose}>Sample Composition</a>
         <a href="#faq" onClick={onClose}>Frequently Asked Questions</a>

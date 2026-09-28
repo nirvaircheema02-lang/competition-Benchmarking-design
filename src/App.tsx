@@ -9,6 +9,7 @@ import { Overview } from '@/components/sections/Overview';
 import { ExecSummary } from '@/components/sections/ExecSummary';
 import { Ecosystem } from '@/components/sections/Ecosystem';
 import { Profiles } from '@/components/sections/Profiles';
+import { MarketShare } from '@/components/sections/MarketShare';
 import { Kpis } from '@/components/sections/Kpis';
 import { Financials } from '@/components/sections/Financials';
 import { CostStructure } from '@/components/sections/CostStructure';
@@ -38,6 +39,7 @@ export function App() {
           <ExecSummary />
           <Ecosystem />
           <Profiles />
+          <MarketShare />
           <Kpis />
           <Financials />
           <CostStructure />

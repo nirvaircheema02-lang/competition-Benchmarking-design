@@ -33,8 +33,9 @@ export function Kpis() {
 
           <div className="kpi-table-wrap">
           <div id="ktab-sales" className={`tab-panel${tab === 'ktab-sales' ? ' show' : ''}`}>
-            <div className="table-wrap">
-              <table className="data-table" aria-label="Vehicle sales KPIs">
+            <div className="report-table-wrap">
+              <div className="report-table-scroll">
+              <table className="report-table report-table--data" aria-label="Vehicle sales KPIs">
                 <thead><tr><th>Company</th><th><div className="tooltip-wrap">Sales Volume (Units)<span className="tooltip-tip">Annual new vehicle sales volume in units across all showrooms</span></div></th><th><div className="tooltip-wrap">Avg Selling Price<span className="tooltip-tip">Average selling price per unit in USD across all brand lines</span></div></th><th>Fleet / Corporate Sales</th><th>YoY Growth</th></tr></thead>
                 <tbody>
                   <tr><td><div className="td-name">Irtoya</div><div className="td-sub">Large · Auth. Distributor</div></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td></tr>
@@ -46,12 +47,14 @@ export function Kpis() {
                   <tr><td><div className="td-name">Moin Motor</div><div className="td-sub">Emerging · Boutique</div></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td></tr>
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
 
           <div id="ktab-aftersales" className={`tab-panel${tab === 'ktab-aftersales' ? ' show' : ''}`}>
-            <div className="table-wrap">
-              <table className="data-table">
+            <div className="report-table-wrap">
+              <div className="report-table-scroll">
+              <table className="report-table report-table--data">
                 <thead><tr><th>Company</th><th><div className="tooltip-wrap">Service Revenue<span className="tooltip-tip">Revenue generated from workshop servicing, maintenance, and repair</span></div></th><th><div className="tooltip-wrap">Parts Revenue<span className="tooltip-tip">Revenue from genuine parts and accessories sales</span></div></th><th>Warranty Income</th><th>Service Centers</th></tr></thead>
                 <tbody>
                   <tr><td><div className="td-name">Irtoya</div></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td></tr>
@@ -60,12 +63,14 @@ export function Kpis() {
                   <tr><td><div className="td-name">Bahman Motor</div></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td></tr>
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
 
           <div id="ktab-portfolio" className={`tab-panel${tab === 'ktab-portfolio' ? ' show' : ''}`}>
-            <div className="table-wrap">
-              <table className="data-table">
+            <div className="report-table-wrap">
+              <div className="report-table-scroll">
+              <table className="report-table report-table--data">
                 <thead><tr><th>Company</th><th>Brand(s) Represented</th><th><div className="tooltip-wrap">Brand Tier<span className="tooltip-tip">Positioning of represented brand(s): Ultra-Luxury, Premium, or Mass Premium</span></div></th><th>No. of Models</th><th>Exclusivity</th></tr></thead>
                 <tbody>
                   <tr><td><div className="td-name">Irtoya</div></td><td>Toyota / Lexus</td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td></tr>
@@ -74,12 +79,14 @@ export function Kpis() {
                   <tr><td><div className="td-name">Assan Motor</div></td><td>Hyundai</td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td></tr>
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
 
           <div id="ktab-pricing" className={`tab-panel${tab === 'ktab-pricing' ? ' show' : ''}`}>
-            <div className="table-wrap">
-              <table className="data-table">
+            <div className="report-table-wrap">
+              <div className="report-table-scroll">
+              <table className="report-table report-table--data">
                 <thead><tr><th>Company</th><th><div className="tooltip-wrap">New Vehicle Gross Profit<span className="tooltip-tip">Gross profit margin on new vehicle sales, reflecting pricing power and market positioning</span></div></th><th>Used Vehicle GP</th><th>Pricing Tier</th><th>F&amp;I Income</th></tr></thead>
                 <tbody>
                   <tr><td><div className="td-name">Irtoya</div></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td></tr>
@@ -87,12 +94,14 @@ export function Kpis() {
                   <tr><td><div className="td-name">Persia Khodro</div></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td></tr>
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
 
           <div id="ktab-footprint" className={`tab-panel${tab === 'ktab-footprint' ? ' show' : ''}`}>
-            <div className="table-wrap">
-              <table className="data-table">
+            <div className="report-table-wrap">
+              <div className="report-table-scroll">
+              <table className="report-table report-table--data">
                 <thead><tr><th>Company</th><th>Showroom Count</th><th>Cities Covered</th><th>Show Floor Area</th><th>Online Presence</th></tr></thead>
                 <tbody>
                   <tr><td><div className="td-name">Irtoya</div></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td></tr>
@@ -101,6 +110,7 @@ export function Kpis() {
                   <tr><td><div className="td-name">Moin Motor</div></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td><td><span className="kpi-cell-blur"></span></td></tr>
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
 

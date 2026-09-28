@@ -30,6 +30,7 @@ export function PageBehaviour() {
     const observers: IntersectionObserver[] = [];
     const trackIO = (io: IntersectionObserver) => { observers.push(io); return io; };
     const timers: number[] = [];
+    const intervals: number[] = [];
     const _setTimeout = window.setTimeout.bind(window);
     const setTimeout = ((fn: TimerHandler, ms?: number) => {
       const id = _setTimeout(fn, ms); timers.push(id); return id;
@@ -78,13 +79,18 @@ export function PageBehaviour() {
     // ---- section scroll reveal ----
       // Containers whose CHILDREN reveal individually (natural reading order).
       var STAGGER = '.approach-grid, .fin-snapshot-grid, .cost-tiles, .insight-cards, .method-cols,'
-                  + '.es-kpi-grid, .es-insight-grid, .rm-list';
+                  + '.es-kpi-strip, .es-findings, .rm-list';
       // Two-column blocks: left enters from the left, right from the right.
       var SPLIT   = '.matrix-wrap, .cost-layout, .ap-row, .ns-grid';
       // Owns a bespoke build sequence already — never double-animate it.
       var SKIP    = '.mindmap-wrap';
-      var STAGGER_MS = 70;   // brief asks 60–100ms
-      var STAGGER_CAP = 8;   // stop compounding delay past this many items
+      var STAGGER_MS = 55;   // brief asks 40–70ms
+      /* Cap the compounding delay at 6: the last item then starts at 330ms and
+         finishes at ~750ms, inside the 500–700ms 'section feels loaded' budget.
+         At the old 70ms x 8 the tail item did not settle until ~1040ms. */
+      var STAGGER_CAP = 6;
+      var ROW_STAGGER_MS = 35;  // table rows: 30–40ms
+      var ROW_CAP = 10;
 
       function arr(x: ArrayLike<unknown>): any[] { return Array.prototype.slice.call(x); }
 
@@ -115,6 +121,21 @@ export function PageBehaviour() {
           arr(inner.children).forEach(function(child: any) { tag(child, 'item'); });
           return;
         }
+        /* A table reveals as container -> header -> rows rather than one block,
+           so the grid reads as filling in. Cells are never tagged: animating
+           them would be 100+ transitions and would fight the row. */
+        var table = el.matches('.report-table-wrap') ? el : el.querySelector('.report-table-wrap');
+        if (table && !isHidden(table)) {
+          tag(table, 'content');
+          table.setAttribute('data-reveal-rows', '');
+          /* Armed here, at init, exactly like every other target. Tagging them
+             later and releasing on rAF would leave the rows at opacity 0 for
+             good in any tab where rAF is throttled. */
+          var hr = table.querySelector('thead tr');
+          if (hr) tag(hr, 'row');
+          arr(table.querySelectorAll('tbody tr')).forEach(function (tr: any) { tag(tr, 'row'); });
+          return;
+        }
         tag(el, el.matches('a, button') ? 'cta' : 'content');
       }
 
@@ -130,23 +151,92 @@ export function PageBehaviour() {
           tagBlock(el);
         });
 
-        var items = arr(sec.querySelectorAll('[data-reveal]'));
+        var items = arr(sec.querySelectorAll('[data-reveal]'))
+          .filter(function (el: any) { return el.getAttribute('data-reveal') !== 'row'; });
         if (!items.length) return;
 
         revealOnEnter(sec, function () {
           items.forEach(function(el: any, i: number) {
-            el.style.setProperty('--reveal-delay', (Math.min(i, STAGGER_CAP) * STAGGER_MS) + 'ms');
+            var base = Math.min(i, STAGGER_CAP) * STAGGER_MS;
+            el.style.setProperty('--reveal-delay', base + 'ms');
             el.classList.add('is-revealed');
             // Drop the compositor hint once the animation has finished.
             setTimeout(function () { el.style.willChange = 'auto'; }, 1200);
+
+            if (el.hasAttribute('data-reveal-rows')) {
+              var head = el.querySelector('thead tr');
+              var rows = arr(el.querySelectorAll('tbody tr'));
+              if (head) head.style.setProperty('--reveal-delay', (base + ROW_STAGGER_MS) + 'ms');
+              rows.forEach(function (tr: any, r: number) {
+                tr.style.setProperty('--reveal-delay',
+                  (base + (Math.min(r, ROW_CAP) + 2) * ROW_STAGGER_MS) + 'ms');
+              });
+              if (head) head.classList.add('is-revealed');
+              rows.forEach(function (tr: any) { tr.classList.add('is-revealed'); });
+            }
           });
-        }, 0.06);
+        }, 0.15);   // brief: trigger at 15-20% visible
+      });
+
+
+    // ---- KPI count-up ----
+      /* Numbers tick up from zero as their card reveals. Each counter waits out
+         its own card's --reveal-delay so the count and the fade read as one
+         gesture rather than two. The authored value stays in the HTML, so with
+         JS off (or reduced motion on) the correct figure is what renders. */
+      var counters = Array.prototype.slice.call(document.querySelectorAll('[data-count-to]'));
+      counters.forEach(function (el: any) {
+        var target = parseFloat(el.getAttribute('data-count-to'));
+        var decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+        if (!isFinite(target)) return;
+        var settled = target.toFixed(decimals);
+
+        if (prefersReducedMotion || document.hidden) { el.textContent = settled; return; }
+
+        el.textContent = (0).toFixed(decimals);
+        var host = el.closest('.es-kpi') || el;
+        var delay = parseFloat(host.style.getPropertyValue('--reveal-delay')) || 0;
+
+        revealOnEnter(host, function () {
+          function run() {
+            /* Timer-driven, not rAF. The tween mutates text, so it is a
+               layout/paint each step either way — rAF buys no compositor win
+               here, and it stalls completely in a throttled or backgrounded
+               tab, which would freeze the number mid-count. */
+            var t0 = performance.now(), DUR = 1100;
+            var id = window.setInterval(function () {
+              var pr = Math.min((performance.now() - t0) / DUR, 1);
+              // ease-out cubic: fast start, settles onto the number
+              var eased = 1 - Math.pow(1 - pr, 3);
+              el.textContent = (target * eased).toFixed(decimals);
+              if (pr >= 1) {
+                el.textContent = settled;
+                window.clearInterval(id);
+              }
+            }, 16);
+            intervals.push(id);
+            /* The settled value must NOT depend on the tween's last tick. Under
+               timer throttling the interval can fire once and stop, which left
+               38.09 on screen instead of 38.12 — a wrong figure, permanently.
+               One timeout is far likelier to land than sixty ticks, and it
+               corrects the value even if it arrives late. */
+            setTimeout(function () {
+              window.clearInterval(id);
+              el.textContent = settled;
+            }, DUR + 120);
+          }
+          if (delay) setTimeout(run, delay); else run();
+        }, 0.3);
       });
 
 
     // ---- mindmap build sequence + hover-connect ----
       var svg = document.querySelector('.mindmap');
-      if (!svg) return;
+      /* The mindmap was replaced by an image-led section, so `.mindmap` no longer
+         exists. This used to read `if (!svg) return;`, which aborted the WHOLE
+         effect and silently took every feature below it — including the entire
+         TOC scroll-spy — down with it. Scope the guard to the mindmap alone. */
+      if (svg) {
 
       var links = Array.prototype.slice.call(svg!.querySelectorAll('.mm-link'));
       var nodes = Array.prototype.slice.call(svg!.querySelectorAll('.mm-node'));
@@ -255,6 +345,8 @@ export function PageBehaviour() {
       });
 
 
+      } // end mindmap
+
     // ---- left sticky TOC + scroll-spy ----
       var links = Array.prototype.slice.call(document.querySelectorAll('.side-toc-link'));
       if (!links.length) return;
@@ -354,11 +446,24 @@ export function PageBehaviour() {
         if (best) setActive(best);
       }
 
-      var ticking = false;
+      /* Time-based throttle, deliberately NOT a rAF latch. The previous version
+         set `ticking = true` and cleared it only inside the rAF callback, so a
+         single dropped frame — which is what a throttled or backgrounded tab
+         does routinely — left it stuck true and the spy never updated again for
+         the rest of the session. Measured: after one dropped frame the highlight
+         froze through every later scroll position. Here the leading edge runs
+         straight off the scroll event, so nothing can stall it, and the trailing
+         call uses setTimeout, which fires far more reliably than rAF. */
+      var SPY_MS = 80;
+      var lastRun = 0, trailing = 0;
       function onScroll() {
-        if (ticking) return;
-        ticking = true;
-        requestAnimationFrame(function(){ ticking = false; pickActive(); });
+        var now = Date.now();
+        var since = now - lastRun;
+        if (since >= SPY_MS) { lastRun = now; pickActive(); return; }
+        if (trailing) return;
+        trailing = setTimeout(function () {
+          trailing = 0; lastRun = Date.now(); pickActive();
+        }, SPY_MS - since);
       }
       window.addEventListener('scroll', onScroll, { passive: true, signal });
       window.addEventListener('resize', onScroll, { passive: true, signal });
@@ -370,6 +475,7 @@ export function PageBehaviour() {
       controller.abort();
       observers.forEach((io) => io.disconnect());
       timers.forEach((t) => window.clearTimeout(t));
+      intervals.forEach((t) => window.clearInterval(t));
     };
   }, []);
 
